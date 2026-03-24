@@ -257,11 +257,6 @@ body {
   opacity: 0.18;
 }
 
-#scene[data-state="dragging"] .scene-glow,
-#pet-container.dragging .pet-stage {
-  transform: scale(1.04);
-}
-
 #scene[data-state="dragging"] #clawd,
 #pet-container.dragging #clawd {
   animation-play-state: paused;

@@ -123,6 +123,8 @@ let mouseOverPet = false;
 let miniMode = false;
 let miniPeeked = false;
 let preMiniBounds: Electron.Rectangle | null = null;
+let sizeReferenceScaleFactor = 1;
+let syncingWindowScale = false;
 let mainTickTimer: NodeJS.Timeout | null = null;
 let wakePollTimer: NodeJS.Timeout | null = null;
 let idleLookTimer: NodeJS.Timeout | null = null;
@@ -210,7 +212,8 @@ async function shutdown(): Promise<void> {
 
 function createWindow(): void {
   const display = screen.getPrimaryDisplay();
-  const { width, height } = getWindowSize(currentSize);
+  sizeReferenceScaleFactor = display.scaleFactor;
+  const { width, height } = getWindowSize(currentSize, display);
   const x = Math.round(display.workArea.x + display.workArea.width - width - 28);
   const y = Math.round(display.workArea.y + display.workArea.height - height - 36);
 
@@ -241,6 +244,13 @@ function createWindow(): void {
   void window.loadFile(rendererEntry);
   window.webContents.on("did-finish-load", () => {
     sendCurrentPresentation();
+  });
+  window.on("move", () => {
+    if (syncingWindowScale) {
+      return;
+    }
+
+    syncWindowSizeForCurrentDisplay(dragLocked ? "top-left" : "bottom-center");
   });
 
   window.on("close", (event) => {
@@ -339,7 +349,7 @@ function updateTrayMenu(snapshot: DesktopPetSnapshot): void {
     {
       label: "自定义色值...",
       click: () => {
-        sendToRenderer("request-accent-color-input", accentColor);
+        void promptForAccentColor();
       }
     }
   ];
@@ -512,6 +522,69 @@ function updateTrayMenu(snapshot: DesktopPetSnapshot): void {
   tray.setContextMenu(menu);
 }
 
+function normalizeWindowPosition(value: number): number | null {
+  if (!Number.isFinite(value)) {
+    return null;
+  }
+
+  return Math.round(value);
+}
+
+function getDisplayScaleFactor(display?: Electron.Display | null): number {
+  if (display && Number.isFinite(display.scaleFactor) && display.scaleFactor > 0) {
+    return display.scaleFactor;
+  }
+
+  return sizeReferenceScaleFactor;
+}
+
+function getWindowSize(size: SizeKey, display?: Electron.Display | null): { width: number; height: number } {
+  const base = SIZES[size];
+  const scaleFactor = getDisplayScaleFactor(display);
+  const scale = sizeReferenceScaleFactor / scaleFactor;
+
+  return {
+    width: Math.max(1, Math.round(base.width * scale)),
+    height: Math.max(1, Math.round((base.height + getBubbleExtraHeight()) * scale))
+  };
+}
+
+function syncWindowSizeForCurrentDisplay(anchor: "bottom-center" | "top-left"): void {
+  if (!mainWindow) {
+    return;
+  }
+
+  const bounds = mainWindow.getBounds();
+  const display = screen.getDisplayMatching(bounds);
+  const next = getWindowSize(currentSize, display);
+
+  if (bounds.width === next.width && bounds.height === next.height) {
+    return;
+  }
+
+  syncingWindowScale = true;
+  try {
+    if (anchor === "top-left") {
+      mainWindow.setBounds({
+        x: bounds.x,
+        y: bounds.y,
+        width: next.width,
+        height: next.height
+      });
+      return;
+    }
+
+    mainWindow.setBounds({
+      x: Math.round(bounds.x + bounds.width / 2 - next.width / 2),
+      y: Math.round(bounds.y + bounds.height - next.height),
+      width: next.width,
+      height: next.height
+    });
+  } finally {
+    syncingWindowScale = false;
+  }
+}
+
 function registerIpc(): void {
   ipcMain.handle("codex:getSnapshot", () => latestSnapshot);
   ipcMain.handle("codex:getBubbleConfig", () => getBubbleConfig());
@@ -538,9 +611,17 @@ function registerIpc(): void {
       return;
     }
     const [x, y] = mainWindow.getPosition();
+    const nextX = normalizeWindowPosition(x + dx);
+    const nextY = normalizeWindowPosition(y + dy);
+
+    if (nextX === null || nextY === null) {
+      return;
+    }
+
     // Only update window position while dragging. Re-applying bounds can cause
     // transparent frameless windows to accumulate platform-specific size drift.
-    mainWindow.setPosition(x + dx, y + dy);
+    mainWindow.setPosition(nextX, nextY);
+    syncWindowSizeForCurrentDisplay("top-left");
   });
 
   ipcMain.on("drag-lock", (_event, locked: boolean) => {
@@ -1199,7 +1280,8 @@ function setWindowSize(size: SizeKey): void {
   }
 
   const currentBounds = mainWindow.getBounds();
-  const next = getWindowSize(size);
+  const display = screen.getDisplayMatching(currentBounds);
+  const next = getWindowSize(size, display);
   currentSize = size;
 
   const x = Math.round(currentBounds.x + currentBounds.width / 2 - next.width / 2);
@@ -1225,7 +1307,8 @@ function updateWindowLayout(): void {
   }
 
   const currentBounds = mainWindow.getBounds();
-  const next = getWindowSize(currentSize);
+  const display = screen.getDisplayMatching(currentBounds);
+  const next = getWindowSize(currentSize, display);
   const x = Math.round(currentBounds.x + currentBounds.width / 2 - next.width / 2);
   const y = Math.round(currentBounds.y + currentBounds.height - next.height);
 
@@ -1239,14 +1322,6 @@ function updateWindowLayout(): void {
   if (miniMode) {
     setMiniBounds(miniPeeked);
   }
-}
-
-function getWindowSize(size: SizeKey): { width: number; height: number } {
-  const base = SIZES[size];
-  return {
-    width: base.width,
-    height: base.height + getBubbleExtraHeight()
-  };
 }
 
 function getBubbleExtraHeight(): number {
@@ -1392,6 +1467,37 @@ async function promptForBubbleSpacing(): Promise<void> {
   }
 
   await setBubbleSpacing(nextSpacingPx);
+}
+
+async function promptForAccentColor(): Promise<void> {
+  const value = await showTextInputDialog({
+    title: "设置主题颜色",
+    message: "输入十六进制颜色值，例如 #7284ff。留空可恢复默认颜色。",
+    defaultValue: accentColor ?? ""
+  });
+
+  if (value === null) {
+    return;
+  }
+
+  const trimmed = value.trim();
+  if (trimmed.length === 0) {
+    await setAccentColor(undefined);
+    return;
+  }
+
+  const normalized = normalizeAccentColor(trimmed);
+  if (!normalized) {
+    if (mainWindow) {
+      await dialog.showMessageBox(mainWindow, {
+        type: "warning",
+        message: "颜色格式无效，请输入 #rgb 或 #rrggbb。"
+      });
+    }
+    return;
+  }
+
+  await setAccentColor(normalized);
 }
 
 async function showTextInputDialog(options: {

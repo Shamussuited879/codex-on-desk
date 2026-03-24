@@ -38,6 +38,34 @@ let bodyTarget = null;
 let shadowTarget = null;
 let eyeBaseTransform = "";
 
+function takeWholePixelDelta(value) {
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+
+  if (value > 0) {
+    return Math.floor(value);
+  }
+
+  if (value < 0) {
+    return Math.ceil(value);
+  }
+
+  return 0;
+}
+
+function flushPendingDrag() {
+  const moveDx = takeWholePixelDelta(pendingDx);
+  const moveDy = takeWholePixelDelta(pendingDy);
+
+  pendingDx -= moveDx;
+  pendingDy -= moveDy;
+
+  if (moveDx !== 0 || moveDy !== 0) {
+    window.electronAPI.moveWindowBy(moveDx, moveDy);
+  }
+}
+
 const STATE_META = {
   disconnected: {
     badge: "Codex",
@@ -171,19 +199,24 @@ document.addEventListener("pointermove", (event) => {
     return;
   }
 
-  pendingDx += event.screenX - lastScreenX;
-  pendingDy += event.screenY - lastScreenY;
-  lastScreenX = event.screenX;
-  lastScreenY = event.screenY;
+  const nextScreenX = Number(event.screenX);
+  const nextScreenY = Number(event.screenY);
+
+  if (!Number.isFinite(nextScreenX) || !Number.isFinite(nextScreenY)) {
+    return;
+  }
+
+  pendingDx += nextScreenX - lastScreenX;
+  pendingDy += nextScreenY - lastScreenY;
+  lastScreenX = nextScreenX;
+  lastScreenY = nextScreenY;
   if (Math.abs(pendingDx) > 3 || Math.abs(pendingDy) > 3) {
     dragMoved = true;
   }
 
   if (!dragRAF) {
     dragRAF = requestAnimationFrame(() => {
-      window.electronAPI.moveWindowBy(pendingDx, pendingDy);
-      pendingDx = 0;
-      pendingDy = 0;
+      flushPendingDrag();
       dragRAF = null;
     });
   }
@@ -337,7 +370,7 @@ function stopDrag() {
       cancelAnimationFrame(dragRAF);
       dragRAF = null;
     }
-    window.electronAPI.moveWindowBy(pendingDx, pendingDy);
+    flushPendingDrag();
     pendingDx = 0;
     pendingDy = 0;
   }
